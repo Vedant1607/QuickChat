@@ -1,4 +1,4 @@
-import assets from "../assets/assets";
+import assets, { imagesDummyData } from "../assets/assets";
 
 const RightSidebar = ({ selectedUser }) => {
   return selectedUser && (
@@ -10,6 +10,19 @@ const RightSidebar = ({ selectedUser }) => {
           {selectedUser.fullName}
         </h1>
         <p className="px-10 mx-auto">{selectedUser.bio}</p>
+      </div>
+
+      <hr className="border-[#ffffff50] my-4" />
+
+      <div className="px-5 text-xs">
+        <p>Media</p>
+        <div className="mt-2 max-h-[200px] overflow-y-scroll grid grid-cols-2 gap-5 opacity-80">
+          {imagesDummyData.map((url, index) => (
+            <div key={index} onClick={() => window.open(url)} className="cursor-pointer rounded">
+              <img src={url} alt="" className="h-full rounded-md" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
