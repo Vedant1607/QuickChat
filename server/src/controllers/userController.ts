@@ -88,8 +88,11 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = generateToken(user._id.toString());
+    const { password: _, ...safeUser } = user.toObject();
+    
     res.status(200).json({
       success: true,
+      userData:safeUser,
       token,
       message: "Login successful",
     });
