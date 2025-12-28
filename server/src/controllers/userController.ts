@@ -4,6 +4,7 @@ import { generateToken } from "../lib/utils.js";
 import type { Request, Response } from "express";
 import { signinSchema, signupSchema } from "../validators/auth.schema.js";
 import { ZodError } from "zod";
+import cloudinary from "../lib/cloudinary.js";
 
 // Signup a new user
 export const signup = async (req: Request, res: Response) => {
@@ -89,10 +90,10 @@ export const login = async (req: Request, res: Response) => {
 
     const token = generateToken(user._id.toString());
     const { password: _, ...safeUser } = user.toObject();
-    
+
     res.status(200).json({
       success: true,
-      userData:safeUser,
+      userData: safeUser,
       token,
       message: "Login successful",
     });
@@ -109,6 +110,51 @@ export const login = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+};
+
+// Controller to check if user is authenticated
+export const checkAuth = (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};
+
+// Controller to update user profile details
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const { profilePic, bio, fullName } = req.body;
+    const userId = req.user._id;
+
+    let updateData: Record<string, unknown> = { bio, fullName };
+
+    if (profilePic) {
+      const upload = await cloudinary.uploader.upload(profilePic);
+      updateData.profilePic = upload.secure_url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    }).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("Update profile error: ", err);
+    return res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : "Internal Server Error",
     });
   }
 };
