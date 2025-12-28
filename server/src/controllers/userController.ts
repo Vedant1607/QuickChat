@@ -5,7 +5,7 @@ import type { Request, Response } from "express";
 import { signinSchema, signupSchema } from "../validators/auth.schema.js";
 import { ZodError } from "zod";
 import cloudinary from "../lib/cloudinary.js";
-import type { IUser } from "../models/IUser.js";
+import type { IUser } from "../types/IUser.js";
 
 // Signup a new user
 export const signup = async (req: Request, res: Response) => {
