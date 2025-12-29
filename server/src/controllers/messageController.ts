@@ -83,3 +83,33 @@ export const getMessages = async (req: Request, res: Response) => {
     });
   }
 };
+
+// api to mark message as seen using message id
+export const markMessageAsSeen = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+    const { id } = req.params;
+    if (!id || !Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid message ID",
+      });
+    }
+    
+    await Message.findByIdAndUpdate(id, { seen: true });
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : "Internal Server Error",
+    });
+  }
+};
