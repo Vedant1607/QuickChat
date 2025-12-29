@@ -4,6 +4,7 @@ import cors from "cors";
 import http from "http";
 import { connectDB } from "./lib/db.js";
 import userRouter from "./routes/userRoutes.js";
+import messageRouter from "./routes/messageRoutes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +15,7 @@ app.use(cors());
 // Routes setup
 app.use("/api/status", (req, res) => res.status(200).send("Server is live"));
 app.use("/api/auth", userRouter);
+app.use("/api/messages", messageRouter);
 
 const startServer = async () => {
   try {
