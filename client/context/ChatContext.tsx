@@ -23,7 +23,7 @@ export const ChatProvider = ({ children }) => {
     } catch (err) {
       toast.error(err.message);
     }
-  }
+  };
 
   // Function to get messages for selected user
   const getMessages = async (userId) => {
@@ -33,13 +33,26 @@ export const ChatProvider = ({ children }) => {
     } catch (err) {
       toast.error(err.message);
     }
-  }
+  };
+
+  // Function to send message to selected user
+  const sendMessage = async (messageData) => {
+    try {
+      const { data } = await axios.post(
+        `/api/messages/send/${selectedUser._id}`,
+        messageData
+      );
+      if (data.success) {
+        setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
 
   const value = {};
 
-  return (
-    <ChatContext.Provider value={value}>
-        { children }
-    </ChatContext.Provider>
-  ) ;
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
