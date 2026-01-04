@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import assets, { userDummyData } from "../assets/assets";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 const Sidebar = ({ selectedUser, setSelectedUser }) => {
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   return (
@@ -27,7 +30,9 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
                 Edit Profile
               </p>
               <hr className="my-2 border-t border-gray-500" />
-              <p className="cursor-pointer text-sm">Logout</p>
+              <p onClick={() => logout()} className="cursor-pointer text-sm">
+                Logout
+              </p>
             </div>
           </div>
         </div>
@@ -43,18 +48,33 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
 
       <div className="flex flex-col">
         {userDummyData.map((user, index) => (
-          <div onClick={() => {setSelectedUser(user)}} key={index} className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${selectedUser?._id === user._id && 'bg-[#282142]/50'}`}>
-            <img src={user?.profilePic || assets.avatar_icon} alt="profile-pic"
-            className="w-[35px] aspect-square rounded-full" />
+          <div
+            onClick={() => {
+              setSelectedUser(user);
+            }}
+            key={index}
+            className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${
+              selectedUser?._id === user._id && "bg-[#282142]/50"
+            }`}
+          >
+            <img
+              src={user?.profilePic || assets.avatar_icon}
+              alt="profile-pic"
+              className="w-[35px] aspect-square rounded-full"
+            />
             <div className="flex flex-col leading-5">
               <p>{user.fullName}</p>
-              {
-                index < 3
-                ? <span className="text-green-400 text-xs">Online</span>
-                : <span className="text-neutral-400 text-xs">Offline</span>
-              }
+              {index < 3 ? (
+                <span className="text-green-400 text-xs">Online</span>
+              ) : (
+                <span className="text-neutral-400 text-xs">Offline</span>
+              )}
             </div>
-            {index > 2 && <p className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50">{index}</p>}
+            {index > 2 && (
+              <p className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50">
+                {index}
+              </p>
+            )}
           </div>
         ))}
       </div>
