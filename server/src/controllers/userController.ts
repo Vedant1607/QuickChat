@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: "Invalid input data",
-        erros: parsed.error.flatten().fieldErrors,
+        errors: parsed.error.flatten().fieldErrors,
       });
     }
     const { email, password } = parsed.data;

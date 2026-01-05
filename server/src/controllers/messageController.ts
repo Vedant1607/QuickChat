@@ -1,13 +1,19 @@
 import type { Request, Response } from "express";
 import User from "../models/User.js";
 import Message from "../models/Message.js";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import cloudinary from "../lib/cloudinary.js";
 import { io, userSocketMap } from "../server.js";
 
 // Get all users except the logged in user
 export const getUsersForSidebar = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
     const userId = req.user._id;
     const filteredUser = await User.find({ _id: { $ne: userId } }).select(
       "-password"
@@ -58,8 +64,15 @@ export const getMessages = async (req: Request, res: Response) => {
       });
     }
 
-    const selectedUserId = new Types.ObjectId(id);
-    const myId = new Types.ObjectId(req.user._id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const selectedUserId = id;
+    const myId = req.user._id;
 
     const messages = await Message.find({
       $or: [
