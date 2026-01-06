@@ -15,7 +15,7 @@ const Sidebar = () => {
   } = useContext(ChatContext);
 
   const { logout, onlineUsers } = useContext(AuthContext);
-  const [input, setInput] = useState(false);
+  const [input, setInput] = useState("");
   const navigate = useNavigate();
 
   const filteredUsers = input

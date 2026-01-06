@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import assets from "../assets/assets";
 import { formatMessageTime } from "../lib/utils";
 import { ChatContext } from "../../context/ChatContext";
@@ -9,11 +9,11 @@ const ChatContainer = () => {
   const { messages, selectedUser, setSelectedUser, sendMessage, getMessages } =
     useContext(ChatContext);
   const { authUser, onlineUsers } = useContext(AuthContext);
-  const scrollEnd = useRef();
+  const scrollEnd = useRef<HTMLDivElement | null>(null);
   const [input, setInput] = useState("");
 
   // Handle sending a message
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = async (e:React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (input.trim() === "") return null;
     await sendMessage({ text: input.trim() });
@@ -21,8 +21,8 @@ const ChatContainer = () => {
   };
 
   // Handle sending a image
-  const handleSendImage = async (e) => {
-    const file = e.target.files[0];
+  const handleSendImage = async (e:React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file || !file.type.startsWith("image/")) {
       toast.error("Select an image file");
       return;
@@ -36,16 +36,15 @@ const ChatContainer = () => {
   };
 
   useEffect(() => {
-    if (selectedUser) {
+    if (!selectedUser?._id) return;
       getMessages(selectedUser._id);
-    }
-  }, [selectedUser]);
+  }, [selectedUser?._id]);
 
   useEffect(() => {
     if (scrollEnd.current && messages) {
       scrollEnd.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+  }, [messages]);
 
   return selectedUser ? (
     <div className="h-full overflow-scroll relative backdrop-blur-lg">
@@ -72,11 +71,11 @@ const ChatContainer = () => {
       </div>
       {/* -------CHAT AREA------- */}
       <div className="flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6">
-        {messages.map((msg, index) => (
+        {messages.map((msg) => (
           <div
-            key={index}
+            key={msg._id}
             className={`flex items-end gap-2 justify-end ${
-              msg.senderId !== authUser._id && "flex-row-reverse"
+              msg.senderId === authUser._id && "flex-row-reverse"
             }`}
           >
             {msg.image ? (

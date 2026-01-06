@@ -27,28 +27,33 @@ export const ChatProvider = ({ children }) => {
 
   // Function to get messages for selected user
   const getMessages = async (userId) => {
+    if (!userId) return;
+
     try {
       const { data } = await axios.get(`/api/messages/${userId}`);
-      setMessages(data.messages);
+      if (data.success) {
+        setMessages(data.messages);
+      }
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err?.response?.data?.message || "Failed to fetch messages");
     }
   };
 
   // Function to send message to selected user
   const sendMessage = async (messageData) => {
+    if (!selectedUser?._id) return;
     try {
       const { data } = await axios.post(
         `/api/messages/send/${selectedUser._id}`,
         messageData
       );
       if (data.success) {
-        setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+        setMessages((prev) => [...prev, data.newMessage]);
       } else {
         toast.error(data.message);
       }
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err?.response?.data?.message || "Failed to send message");
     }
   };
 
@@ -56,30 +61,45 @@ export const ChatProvider = ({ children }) => {
   const subscribeToMessages = async () => {
     if (!socket) return;
     socket.on("newMessage", (newMessage) => {
-      if(selectedUser && newMessage.senderId === selectedUser._id) {
+      if (selectedUser && newMessage.senderId === selectedUser._id) {
         newMessage.seen = true;
         setMessages((prevMessages) => [...prevMessages, newMessage]);
-        const { data } = axios.put(`/api/messages/mark/${newMessage._id}`);
+        try {
+          axios.put(`/api/messages/mark/${newMessage._id}`);
+        } catch (error) {
+          console.error("Failed to mark message as seen", error);
+        }
       } else {
         setUnseenMessages((prevUnseenMessages) => ({
-          ...prevUnseenMessages, [newMessage.senderId] : prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1
-        }))
+          ...prevUnseenMessages,
+          [newMessage.senderId]: prevUnseenMessages[newMessage.senderId]
+            ? prevUnseenMessages[newMessage.senderId] + 1
+            : 1,
+        }));
       }
-    })
-  }
+    });
+  };
 
   // Function to unsubscribe from messages
   const unsubscribeFromMessages = () => {
-    if(socket) socket.off("newMessage");
-  }
+    if (socket) socket.off("newMessage");
+  };
 
   useEffect(() => {
     subscribeToMessages();
     return () => unsubscribeFromMessages();
-  }, [socket, selectedUser])
+  }, [socket, selectedUser]);
 
   const value = {
-    messages, users, selectedUser, setSelectedUser, getUsers, getMessages, sendMessage, unseenMessages, setUnseenMessages
+    messages,
+    users,
+    selectedUser,
+    setSelectedUser,
+    getUsers,
+    getMessages,
+    sendMessage,
+    unseenMessages,
+    setUnseenMessages,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
