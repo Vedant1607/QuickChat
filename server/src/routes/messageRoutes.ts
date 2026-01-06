@@ -5,7 +5,7 @@ import { getMessages, getUsersForSidebar, markMessageAsSeen, sendMessage } from 
 const messageRouter = express.Router();
 
 // Get users for sidebar
-messageRouter.get("/user", protectRoute, getUsersForSidebar);
+messageRouter.get("/users", protectRoute, getUsersForSidebar);
 
 // Get messages with a specific user
 messageRouter.get("/:id", protectRoute, getMessages);
