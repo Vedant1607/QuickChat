@@ -9,6 +9,7 @@ import React, {
 import { AuthContext } from "./AuthContext";
 import toast from "react-hot-toast";
 import api from "../src/lib/axios";
+import type { User } from "../src/types/user";
 
 interface Message {
   _id: string;
@@ -17,12 +18,8 @@ interface Message {
   content: string;
   seen: boolean;
   createdAt: string;
-}
-
-interface User {
-  _id: string;
-  fullName: string;
-  email: string;
+  image?: string;
+  text?: string;
 }
 
 interface ChatContextType {
