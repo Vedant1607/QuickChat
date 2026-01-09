@@ -9,12 +9,7 @@ import React, {
 import toast from "react-hot-toast";
 import { io, Socket } from "socket.io-client";
 import api, { setAuthToken } from "../src/lib/axios";
-
-interface User {
-  _id: string;
-  fullName: string;
-  email: string;
-}
+import type { User } from "../src/types/user";
 
 interface AuthContextType {
   authUser: User | null;
