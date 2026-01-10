@@ -5,6 +5,13 @@ import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 
 const Sidebar = () => {
+  const chatContext = useContext(ChatContext);
+  const authContext = useContext(AuthContext);
+  
+  if (!chatContext || !authContext) {
+    throw new Error("Sidebar must be used within providers");
+  }
+
   const {
     getUsers,
     users,
@@ -12,9 +19,9 @@ const Sidebar = () => {
     setSelectedUser,
     unseenMessages,
     setUnseenMessages,
-  } = useContext(ChatContext);
+  } = chatContext;
 
-  const { logout, onlineUsers } = useContext(AuthContext);
+  const { logout, onlineUsers } = authContext;
   const [input, setInput] = useState("");
   const navigate = useNavigate();
 
@@ -26,7 +33,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     getUsers();
-  }, [onlineUsers]);
+  }, [getUsers, onlineUsers]);
 
   return (
     <div
@@ -69,13 +76,16 @@ const Sidebar = () => {
       </div>
 
       <div className="flex flex-col">
-        {filteredUsers.map((user, index) => (
+        {filteredUsers.map((user) => {
+          const unseenCount = unseenMessages[user._id] ?? 0;
+
+          return (
           <div
             onClick={() => {
               setSelectedUser(user);
               setUnseenMessages(prev => ({...prev, [user._id]:0}));
             }}
-            key={index}
+            key={user._id}
             className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${
               selectedUser?._id === user._id && "bg-[#282142]/50"
             }`}
@@ -93,13 +103,15 @@ const Sidebar = () => {
                 <span className="text-neutral-400 text-xs">Offline</span>
               )}
             </div>
-            {unseenMessages[user._id] > 0 && (
+
+            {unseenCount > 0 && (
               <p className="absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50">
-                {unseenMessages[user._id]}
+                {unseenCount}
               </p>
             )}
           </div>
-        ))}
+        );
+      })}
       </div>
     </div>
   );
