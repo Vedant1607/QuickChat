@@ -8,14 +8,22 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 const App = () => {
-  const { authUser } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("App must be used within AuthProvider");
+  }
+
+  const { authUser } = authContext;
+
+  const isAuthenticated = Boolean(authUser);
+
   return (
-    <div className="bg-[url('./src/assets/bgImage.svg')] bg-contain">
+    <div className="bg-[url('/bgImage.svg')] bg-contain min-h-screen">
       <Toaster />
       <Routes>
-        <Route path="/" element={authUser ? <HomePage/> : <Navigate to={"/login"} />}/>
-        <Route path="/login" element={!authUser ? <LoginPage/> : <Navigate to={"/"} />}/>
-        <Route path="/profile" element={authUser ? <ProfilePage/> : <Navigate to={"/login"} />}/>
+        <Route path="/" element={isAuthenticated ? <HomePage/> : <Navigate to={"/login"} replace />}/>
+        <Route path="/login" element={!isAuthenticated ? <LoginPage/> : <Navigate to={"/"} replace />}/>
+        <Route path="/profile" element={isAuthenticated ? <ProfilePage/> : <Navigate to={"/login"} replace />}/>
       </Routes>
     </div>
   );
