@@ -1,30 +1,45 @@
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import assets from "../assets/assets";
 import { AuthContext } from "../../context/AuthContext";
 
+type AuthMode = "Sign up" | "Login";
+
 const LoginPage = () => {
-  const [currState, setCurrState] = useState("Sign up");
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error("LoginPage must be used within AuthProvider");
+  }
+
+  const { login } = authContext;
+
+  const [mode, setMode] = useState<AuthMode>("Sign up");
+  const [stepCompleted, setStepCompleted] = useState(false);
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
-  const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
-  const { login } = useContext(AuthContext);
-
-  const onSubmitHandler = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (currState === "Sign up" && !isDataSubmitted) {
-      setIsDataSubmitted(true);
+    if (mode === "Sign up" && !stepCompleted) {
+      setStepCompleted(true);
       return;
     }
-    login(currState === "Sign up" ? "signup" : "login", {
+
+    login(mode === "Sign up" ? "signup" : "login", {
       fullName,
       email,
       password,
       bio,
     });
+  };
+
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    setStepCompleted(false);
   };
 
   return (
@@ -34,22 +49,22 @@ const LoginPage = () => {
 
       {/* ------- right ------- */}
       <form
-        onSubmit={onSubmitHandler}
+        onSubmit={handleSubmit}
         className="border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg"
       >
         <h2 className="font-medium text-2xl flex justify-between items-center">
-          {currState}
-          {isDataSubmitted && (
+          {mode}
+          {stepCompleted && (
             <img
-              onClick={() => setIsDataSubmitted(false)}
+              onClick={() => setStepCompleted(false)}
               src={assets.arrow_icon}
-              alt=""
+              alt="back"
               className="w-5 cursor-pointer"
             />
           )}
         </h2>
 
-        {currState === "Sign up" && !isDataSubmitted && (
+        {mode === "Sign up" && !stepCompleted && (
           <input
             onChange={(e) => setFullName(e.target.value)}
             value={fullName}
@@ -59,7 +74,7 @@ const LoginPage = () => {
             required
           />
         )}
-        {!isDataSubmitted && (
+        {!stepCompleted && (
           <>
             <input
               onChange={(e) => setEmail(e.target.value)}
@@ -80,13 +95,13 @@ const LoginPage = () => {
           </>
         )}
 
-        {currState === "Sign up" && isDataSubmitted && (
+        {mode === "Sign up" && stepCompleted && (
           <textarea
             onChange={(e) => setBio(e.target.value)}
             value={bio}
             rows={4}
             className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="provide a short bio..."
+            placeholder="Provide a short bio..."
             required
           ></textarea>
         )}
@@ -95,7 +110,7 @@ const LoginPage = () => {
           type="submit"
           className="py-3 bg-linear-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer"
         >
-          {currState === "Sign up" ? "Create Account" : "Login Now"}
+          {mode === "Sign up" ? "Create Account" : "Login Now"}
         </button>
 
         <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -104,14 +119,11 @@ const LoginPage = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          {currState === "Sign up" ? (
+          {mode === "Sign up" ? (
             <p className="text-sm text-gray-600">
               Already have an account?
               <span
-                onClick={() => {
-                  setCurrState("Login");
-                  setIsDataSubmitted(false);
-                }}
+                onClick={() => switchMode("Login")}
                 className="font-medium text-violet-500 cursor-pointer"
               >
                 Login here
@@ -121,7 +133,7 @@ const LoginPage = () => {
             <p className="text-sm text-gray-600">
               Create an account
               <span
-                onClick={() => setCurrState("Sign up")}
+                onClick={() => switchMode("Sign up")}
                 className="font-medium text-violet-500 cursor-pointer"
               >
                 Click here
